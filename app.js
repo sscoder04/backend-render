@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import {Server} from "socket.io";
 import {createServer, get} from "http";
@@ -13,7 +14,13 @@ import { disconnectHandler } from "./socketHandlers/disconnect.js";
 // Netlify-hosted frontend. Local dev behavior (port 8080, localhost:3000) is
 // unchanged if these env vars are not set.
 let port=process.env.PORT || 8080;
-const clientOrigin=process.env.CLIENT_ORIGIN || "http://localhost:3000";
+// CLIENT_ORIGIN can be a single URL or a comma-separated list, so both
+// localhost (same-device dev) and a LAN IP (cross-device testing) can be
+// allowed at the same time, e.g.:
+// CLIENT_ORIGIN=http://localhost:3000,http://192.168.1.42:3000
+const clientOrigin = (process.env.CLIENT_ORIGIN || "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim());
 const app=express();
 
 const httpServer=createServer(app);
